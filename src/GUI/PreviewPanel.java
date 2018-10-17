@@ -1,14 +1,11 @@
 package GUI;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import javax.swing.*;
 
 import static GUI.Gui.controlButtons;
 import static GUI.Gui.stripes;
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static GUI.Gui.intensitySettings;
 
 public class PreviewPanel extends JPanel {
 
@@ -30,10 +27,29 @@ public class PreviewPanel extends JPanel {
         for (int i=0; i<6; i+=1) {
             for (int j=0; j<4; j+=1) {
                 if (controlButtons[6*j+i][0].isSelected()) {
-                    g.setColor(Color.BLUE);
+
+                    // Determine whether to black out the circle or show blue illumination:
+                    JTextField curr_setting = intensitySettings[6*j+i][0];
+                    String text = curr_setting.getText();
+
+                    try {
+                        if (text.isEmpty()) {
+                            g.setColor(Color.BLACK);
+                        } else {
+                            float f = Float.valueOf(text.trim()).floatValue();
+                            if (f == 0) {
+                                g.setColor(Color.BLACK);
+                            } else {
+                                g.setColor(Color.BLUE);
+                            }
+                        }
+                    } catch (NumberFormatException nfe) {
+                        System.out.println("Intensity setting not numerical error: " + nfe.getMessage());
+                    }
 
                     g.fillOval(getWidth()/12 + i*getWidth()/7, getHeight()/8 + j*getHeight()/5,
                             getWidth()/9, getHeight()/6);
+
 
                 } else if (controlButtons[6*j+i][1].isSelected()) {
                     g2.setPaint(tp);
@@ -60,13 +76,5 @@ public class PreviewPanel extends JPanel {
 
             }
         }
-
-
-
-
     }
-
-
-    static Graphics[] circlePreviews = new Graphics[24];
-
 }

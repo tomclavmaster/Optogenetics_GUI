@@ -7,6 +7,8 @@ import java.awt.*;
 // For images:
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -62,8 +64,8 @@ public class Gui extends JFrame implements ActionListener {
         // Main GUI window initialization:
         frame = new JFrame("LED Controller");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 780);
-        frame.setResizable(false);
+        frame.setSize(1000, 730);
+//        frame.setResizable(false);
 
         // Initialize nested panels:
         initLeftPanel();
@@ -210,19 +212,19 @@ public class Gui extends JFrame implements ActionListener {
         JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.X_AXIS));
         headerPanel.add( new JLabel("Channel:") );
-        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        headerPanel.add( new JLabel("Const "));
-        headerPanel.add( new JLabel("Blink "));
+        headerPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        headerPanel.add( new JLabel("Const / "));
+        headerPanel.add( new JLabel("Blink / "));
         headerPanel.add( new JLabel("Func"));
-        headerPanel.add(Box.createRigidArea(new Dimension(27, 0)));
+        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         headerPanel.add( new JLabel("I (uW/mm^2)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(60, 0)));
+        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         headerPanel.add( new JLabel("I_min (uW/mm^2)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(60, 0)));
+        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         headerPanel.add( new JLabel("I_max (uW/mm^2)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(50, 0)));
+        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         headerPanel.add( new JLabel("duty_cycle (%)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(45, 0)));
+        headerPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         headerPanel.add( new JLabel("period (s)"));
         headerPanel.add(Box.createRigidArea(new Dimension(100, 0)));
 
@@ -269,6 +271,13 @@ public class Gui extends JFrame implements ActionListener {
         for (int i=1; i<5; i+=1) {
             intensitySettings[chan_num][i].setEnabled(false);
         }
+
+        // Will adjust colors after intensity values input and text box loses focus:
+        intensitySettings[chan_num][0].addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                frame.repaint();
+            }
+        });
         return intensityPanel;
     }
 
@@ -281,9 +290,7 @@ public class Gui extends JFrame implements ActionListener {
             int exit_code = JSON_Out.write_json_file();
             if (exit_code == 0) {
                 uploadJSON();
-                System.out.println("here");
             }
-
         } else {
             int chan_num = Integer.parseInt(curr_action.split(",")[0]);
             int buttonNum = Integer.parseInt(curr_action.split(",")[1]);
@@ -320,6 +327,7 @@ public class Gui extends JFrame implements ActionListener {
         try {
             session = jsch.getSession("pi", "192.168.4.1");
             session.setConfig("StrictHostKeyChecking", "no");
+            session.setTimeout(15000); // Timeout after 15 seconds without connection.
             session.setPassword("raspberry");
             session.connect();
 
@@ -327,15 +335,15 @@ public class Gui extends JFrame implements ActionListener {
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
 
-//            System.out.println();
 
             String settingsDirectory = (System.getProperty("user.dir") + "/settings.json");
-            System.out.println(settingsDirectory);
-
-//            sftpChannel.cd("");
             sftpChannel.put(settingsDirectory, "/home/pi/LED_Driver/Adafruit_TLC5947_master/settings.json");
             sftpChannel.exit();
             session.disconnect();
+
+//            JOptionPane.showMessageDialog(frame, "Eggs are not supposed to be green.");
+
+
         } catch (JSchException e) {
             e.printStackTrace();
         } catch (SftpException e) {

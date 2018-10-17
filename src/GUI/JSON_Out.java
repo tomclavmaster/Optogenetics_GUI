@@ -68,6 +68,8 @@ class JSON_Out {
             String m_val = ((JTextField) all_components[1]).getText();
             String b_val = ((JTextField) all_components[3]).getText();
 
+            // TODO: Pop up a dialogue when m or b are not entered!
+
             try {
                 float m_float = Float.valueOf(m_val.trim()).floatValue();
                 pwmArr.add(m_float);
