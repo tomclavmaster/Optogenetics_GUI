@@ -21,13 +21,13 @@ import com.jcraft.jsch.*;
 
 public class Gui extends JFrame implements ActionListener {
 
-    public Gui() {
+    private Gui() {
         initMainWindow();
         initFunctionWindows();
         frame.setVisible(true);
     }
 
-    public final void initMainWindow() {
+    private final void initMainWindow() {
 
         // Load stripe image:
         try {
@@ -216,13 +216,13 @@ public class Gui extends JFrame implements ActionListener {
         headerPanel.add( new JLabel("Const / "));
         headerPanel.add( new JLabel("Blink / "));
         headerPanel.add( new JLabel("Func"));
-        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        headerPanel.add(Box.createRigidArea(new Dimension(17, 0)));
         headerPanel.add( new JLabel("I (uW/mm^2)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        headerPanel.add( new JLabel("I_min (uW/mm^2)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        headerPanel.add( new JLabel("I_max (uW/mm^2)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        headerPanel.add(Box.createRigidArea(new Dimension(40, 0)));
+        headerPanel.add( new JLabel("I_min"));
+        headerPanel.add(Box.createRigidArea(new Dimension(72, 0)));
+        headerPanel.add( new JLabel("I_max"));
+        headerPanel.add(Box.createRigidArea(new Dimension(60, 0)));
         headerPanel.add( new JLabel("duty_cycle (%)"));
         headerPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         headerPanel.add( new JLabel("period (s)"));
