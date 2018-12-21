@@ -5,11 +5,10 @@ import javax.swing.*;
 // For JSON file:
 import simple.JSONArray;
 import simple.JSONObject;
+import simple.parser.JSONParser;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 import static GUI.Gui.functionPanels;
@@ -99,11 +98,10 @@ class JSON_Out {
 
 
 
-    static int write_json_file(File file) {
+    static int write_json_file(File fileToBeSaved) {
         // Method used when user saves to a local file, NOT for uploading to Raspberry Pi.
 
-        try (FileWriter fileWriter = new FileWriter(file)) {
-
+        try (FileWriter fileWriter = new FileWriter(fileToBeSaved)) {
 
             JSONArray allSettings = new JSONArray();
 
@@ -167,22 +165,123 @@ class JSON_Out {
             allSettings.add(pwmArr);
 
             // Write all of the settings for all channels to the JSON file:
-            System.out.println(allSettings.toJSONString());
             fileWriter.write(allSettings.toJSONString());
             fileWriter.flush();
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException saveException) {
+            saveException.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Failed to save file",
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
         return 0;
     }
 
 
 
-    static int read_json_file(File file) {
+    static int read_json_file(File fileToBeRead) {
+
+        //JSON parser object to parse read file
+        JSONParser jsonParser = new JSONParser();
+
+        try (FileReader fileReader = new FileReader(fileToBeRead)) {
+
+            //Read JSON file
+            Object obj = jsonParser.parse(fileReader);
+            JSONArray allSettingsList = (JSONArray) obj;
+
+
+            // Parse all channel settings:
+            for (int curr_chan = 0; curr_chan < allSettingsList.size() - 1; curr_chan += 1) {
+                JSONObject currChannel = (JSONObject) allSettingsList.get(curr_chan);
+
+                try {
+
+                    int mode = ((Long) currChannel.get("controlMode")).intValue();
+                    for (int j = 0; j < Gui.controlButtons[curr_chan].length; j += 1) {
+                        if (j == mode) {
+                            Gui.controlButtons[curr_chan][j].setSelected(true);
+                            Gui.channelRedraw(curr_chan, j, false);
+                        } else {
+                            Gui.controlButtons[curr_chan][j].setSelected(false);
+                        }
+                    }
+
+                    // Grab intensity values from JSON array:
+                    JSONArray intensityList = (JSONArray) currChannel.get("intensity_settings");
+                    for (int settingNum = 0; settingNum < intensityList.size(); settingNum += 1) {
+                        Object currSettingObj = intensityList.get(settingNum);
+                        if (currSettingObj instanceof String) {
+                            // Means no setting needs to be loaded.
+                            Gui.intensitySettings[curr_chan][settingNum].setText("");
+                        } else {
+                            // Means a setting was stored.
+                            String currValStr = ((Double) currSettingObj).toString();
+                            Gui.intensitySettings[curr_chan][settingNum].setText(currValStr);
+                        }
+
+                    }
+
+
+                    // Grab all linear/sine function info from JSON:
+                    JSONArray allFunctions = (JSONArray) currChannel.get("functions");
+                    for (int funcNum = 0; funcNum < allFunctions.size(); funcNum += 1) {
+                        JSONArray currFunctionArray = (JSONArray) allFunctions.get(funcNum);
+
+                        functionPanels[curr_chan] =
+                    }
+
+
+
+
+
+
+                } catch (ClassCastException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Something went wrong! This file could not be loaded.",
+                            "Warning", JOptionPane.WARNING_MESSAGE);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+            // Parse PWM conversion values:
+            JSONArray pwmArr = (JSONArray) allSettingsList.get(allSettingsList.size()-1);
+            String m_string = String.valueOf(pwmArr.get(0));
+            String b_string = String.valueOf(pwmArr.get(1));
+
+            Component[] all_components = inputLinePanel.getComponents();
+            ((JTextField) all_components[1]).setText(m_string);
+            ((JTextField) all_components[3]).setText(b_string);
+
+
+
+        } catch (FileNotFoundException readException) {
+            readException.printStackTrace();
+            JOptionPane.showMessageDialog(null, "File \"" + fileToBeRead.getName() + "\" Not Found",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
+        } catch(IOException e){
+            e.printStackTrace();
+        } catch (simple.parser.ParseException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Invalid Settings File",
+                    "Alert", JOptionPane.WARNING_MESSAGE);
+        }
+
         return 0;
     }
+
+
 
     private static JSONArray getFunctionObject(int curr_chan) {
         JSONArray allFunctions = new JSONArray();

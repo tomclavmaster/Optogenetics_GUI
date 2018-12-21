@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 
 public class FunctionWindow extends JFrame implements ActionListener {
     FunctionWindow(String _channel) {
@@ -15,7 +14,7 @@ public class FunctionWindow extends JFrame implements ActionListener {
         initMainWindow();
     }
 
-    public void showWindow() {
+    void showWindow() {
         frame.setVisible(true);
     }
 
@@ -221,12 +220,16 @@ public class FunctionWindow extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String curr_action = e.getActionCommand();
 
-        if (curr_action.equals("add_linear_block")) {
-            addLinearBlock();
-        } else if (curr_action.equals("add_sine_block")) {
-            addSineBlock();
-        } else if (curr_action.equals("remove_prev_block")) {
-            removePrevBlock();
+        switch (curr_action) {
+            case "add_linear_block":
+                addLinearBlock();
+                break;
+            case "add_sine_block":
+                addSineBlock();
+                break;
+            case "remove_prev_block":
+                removePrevBlock();
+                break;
         }
 
         flushAddPanel();
@@ -291,10 +294,6 @@ public class FunctionWindow extends JFrame implements ActionListener {
             blockArray.remove(blockArray.size()-1);
             allFuncSettings.remove(allFuncSettings.size()-1);
         }
-    }
-
-    ArrayList<BlockContainer> getBlockArray() {
-        return blockArray;
     }
 
     ArrayList< String[] > getFuncSettings() {

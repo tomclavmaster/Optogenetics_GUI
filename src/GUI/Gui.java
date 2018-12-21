@@ -124,8 +124,11 @@ public class Gui extends JFrame implements ActionListener {
                 fileChooser.setFileFilter(new FileNameExtensionFilter(".json files", "json"));
 
                 if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    JSON_Out.read_json_file(file);  // load from file
+                    File fileToBeRead = fileChooser.getSelectedFile();
+                    JSON_Out.read_json_file(fileToBeRead);  // load from file
+
+                    frame.validate();
+                    frame.repaint();
                 }
             }
         );
@@ -135,9 +138,19 @@ public class Gui extends JFrame implements ActionListener {
             e -> {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Save As");
+                fileChooser.setPreferredSize(new Dimension(800,600));
                 if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    JSON_Out.write_json_file(file);  // save to file
+                    File fileToBeSaved = fileChooser.getSelectedFile();
+
+                    String suffix = ".json";
+                    if(!fileChooser.getSelectedFile().getAbsolutePath().endsWith(suffix)){
+                        fileToBeSaved = new File(fileChooser.getSelectedFile() + suffix);
+                    }
+
+                    JSON_Out.write_json_file(fileToBeSaved);  // save to file
+
+                    frame.validate();
+                    frame.repaint();
                 }
             }
         );
@@ -333,6 +346,33 @@ public class Gui extends JFrame implements ActionListener {
     }
 
 
+    static void channelRedraw(int chan_num, int buttonNum, boolean showFunctionWindow) {
+        switch (buttonNum) {
+            case 0:
+                for (int i = 1; i < 5; i += 1) {
+                    intensitySettings[chan_num][i].setEnabled(false);
+                }
+                intensitySettings[chan_num][0].setEnabled(true);
+                break;
+
+            case 1:
+                intensitySettings[chan_num][0].setEnabled(false);
+                for (int i = 1; i < 5; i += 1) {
+                    intensitySettings[chan_num][i].setEnabled(true);
+                }
+                break;
+
+            case 2:
+                for (int i = 0; i < 5; i += 1) {
+                    intensitySettings[chan_num][i].setEnabled(false);
+                }
+                if (showFunctionWindow)
+                    functionPanels[chan_num].showWindow();
+                break;
+        }
+    }
+
+
     public void actionPerformed(ActionEvent e) {
         String curr_action = e.getActionCommand();
         frame.repaint();
@@ -346,30 +386,12 @@ public class Gui extends JFrame implements ActionListener {
             int chan_num = Integer.parseInt(curr_action.split(",")[0]);
             int buttonNum = Integer.parseInt(curr_action.split(",")[1]);
 
-            switch (buttonNum) {
-                case 0:
-                    for (int i = 1; i < 5; i += 1) {
-                        intensitySettings[chan_num][i].setEnabled(false);
-                    }
-                    intensitySettings[chan_num][0].setEnabled(true);
-                    break;
-
-                case 1:
-                    intensitySettings[chan_num][0].setEnabled(false);
-                    for (int i = 1; i < 5; i += 1) {
-                        intensitySettings[chan_num][i].setEnabled(true);
-                    }
-                    break;
-
-                case 2:
-                    for (int i = 0; i < 5; i += 1) {
-                        intensitySettings[chan_num][i].setEnabled(false);
-                    }
-                    functionPanels[chan_num].showWindow();
-                    break;
-            }
+            channelRedraw(chan_num, buttonNum, true);
         }
     }
+
+
+
 
 
     private void uploadJSON() {
