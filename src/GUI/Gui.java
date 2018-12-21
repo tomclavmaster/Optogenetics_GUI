@@ -5,15 +5,15 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 // For images:
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 // For SFTP:
 import com.jcraft.jsch.*;
@@ -27,7 +27,7 @@ public class Gui extends JFrame implements ActionListener {
         frame.setVisible(true);
     }
 
-    private final void initMainWindow() {
+    private void initMainWindow() {
 
         // Load stripe image:
         try {
@@ -61,10 +61,12 @@ public class Gui extends JFrame implements ActionListener {
             // handle exception
         }
 
+        initMenuBar();
+
         // Main GUI window initialization:
         frame = new JFrame("LED Controller");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 730);
+        frame.setSize(1000, 750);
 //        frame.setResizable(false);
 
         // Initialize nested panels:
@@ -78,6 +80,9 @@ public class Gui extends JFrame implements ActionListener {
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         frame.add(mainPanel);
 
+
+        frame.setJMenuBar(menuBar);
+
     }
 
     private void initFunctionWindows() {
@@ -89,6 +94,53 @@ public class Gui extends JFrame implements ActionListener {
                 chan_num += 1;
             }
         }
+    }
+
+    private void initMenuBar() {
+        //Create the menu bar.
+        menuBar = new JMenuBar();
+        JMenu menu;
+        JMenuItem menuItemOpen;
+        JMenuItem menuItemSaveAs;
+
+        //Build the first menu.
+        menu = new JMenu("File");
+        menu.setMnemonic(KeyEvent.VK_A);
+        menuBar.add(menu);
+
+        // a group of JMenuItems
+        menuItemOpen = new JMenuItem("Open");
+        menu.add(menuItemOpen);
+
+        menuItemSaveAs = new JMenuItem("Save As");
+        menu.add(menuItemSaveAs);
+
+
+        menuItemOpen.addActionListener(
+            e -> {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Open");
+                fileChooser.setPreferredSize(new Dimension(800,600));
+                fileChooser.setFileFilter(new FileNameExtensionFilter(".json files", "json"));
+
+                if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    JSON_Out.read_json_file(file);  // load from file
+                }
+            }
+        );
+
+
+        menuItemSaveAs.addActionListener(
+            e -> {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Save As");
+                if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    JSON_Out.write_json_file(file);  // save to file
+                }
+            }
+        );
     }
 
     private void initLeftPanel() {
@@ -186,12 +238,12 @@ public class Gui extends JFrame implements ActionListener {
 
         int chan_num = 0;
         String letters[] = {"A","B","C","D"};
-        for (int i = 0; i < letters.length; i+=1) {
-            for (int j = 1; j <= 6; j+=1) {
+        for (String letter : letters)
+            for (int j = 1; j <= 6; j += 1) {
                 JPanel fullWidthPanel = new JPanel();
                 fullWidthPanel.setLayout(new BoxLayout(fullWidthPanel, BoxLayout.X_AXIS));
 
-                JPanel channelButtons = makeChannelButtons(letters[i] + j, chan_num);
+                JPanel channelButtons = makeChannelButtons(letter + j, chan_num);
                 JPanel intensityPanel = makeIntensityPanel(chan_num);
 
 
@@ -201,7 +253,6 @@ public class Gui extends JFrame implements ActionListener {
                 centerPanel.add(fullWidthPanel);
                 chan_num += 1;
             }
-        }
         JButton submit = new JButton("Submit and Upload!");
         submit.addActionListener(this);
         submit.setActionCommand("submit_settings");
@@ -321,9 +372,9 @@ public class Gui extends JFrame implements ActionListener {
     }
 
 
-    public void uploadJSON() {
+    private void uploadJSON() {
         JSch jsch = new JSch();
-        Session session = null;
+        Session session;
         try {
             session = jsch.getSession("pi", "192.168.4.1");
             session.setConfig("StrictHostKeyChecking", "no");
@@ -341,13 +392,14 @@ public class Gui extends JFrame implements ActionListener {
             sftpChannel.exit();
             session.disconnect();
 
-//            JOptionPane.showMessageDialog(frame, "Eggs are not supposed to be green.");
-
-
         } catch (JSchException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Check connection to Raspberry Pi",
+                    "Error: Unable to connect", JOptionPane.ERROR_MESSAGE);
         } catch (SftpException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Check connection to Raspberry Pi",
+                    "Error: Unable to connect", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -367,4 +419,7 @@ public class Gui extends JFrame implements ActionListener {
     static JRadioButton[][] controlButtons = new JRadioButton[24][3];
     static JTextField[][] intensitySettings = new JTextField[24][5];
     static FunctionWindow[] functionPanels = new FunctionWindow[24];
+
+    // Necessary for menu bar:
+    private JMenuBar menuBar;
 }
