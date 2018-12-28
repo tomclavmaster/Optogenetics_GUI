@@ -85,7 +85,7 @@ public class Gui extends JFrame implements ActionListener {
 
     }
 
-    private void initFunctionWindows() {
+    private static void initFunctionWindows() {
         int chan_num = 0;
         String letters[] = {"A","B","C","D"};
         for (int i = 0; i < letters.length; i+=1) {
@@ -129,6 +129,7 @@ public class Gui extends JFrame implements ActionListener {
 
                     frame.validate();
                     frame.repaint();
+
                 }
             }
         );
@@ -388,6 +389,11 @@ public class Gui extends JFrame implements ActionListener {
 
             channelRedraw(chan_num, buttonNum, true);
         }
+    }
+
+    public static void resetFunctionWindows() {
+        functionPanels = new FunctionWindow[24];
+        initFunctionWindows();
     }
 
 

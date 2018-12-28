@@ -1,5 +1,7 @@
 package GUI;
 
+import sun.jvm.hotspot.opto.Block;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -16,6 +18,7 @@ public class FunctionWindow extends JFrame implements ActionListener {
 
     void showWindow() {
         frame.setVisible(true);
+        refreshBlocks();
     }
 
     private void initMainWindow() {
@@ -75,7 +78,6 @@ public class FunctionWindow extends JFrame implements ActionListener {
         sinePanel.add(new JLabel("C:"));
         sinePanel.add(new JTextField("", 5));
         sinePanel.add(Box.createRigidArea(new Dimension(35, 0)));
-//        sinePanel.add(new JTextField("", 7));
         sinePanel.add(new JLabel("t(seconds) <="));
         sinePanel.add(new JTextField("", 7));
 
@@ -112,7 +114,7 @@ public class FunctionWindow extends JFrame implements ActionListener {
         return blockPanelContainer;
     }
 
-    private JPanel createLinearBlock(String m, String b, String t_start, String t_end) {
+    private JPanel initLinearBlock(String m, String b, String t_start, String t_end) {
         JPanel currLinear = new JPanel();
         currLinear.setBorder(BorderFactory.createLineBorder(Color.black, 2, true));
         Dimension blockDim = new Dimension(frame.getWidth()-20, 40);
@@ -146,7 +148,7 @@ public class FunctionWindow extends JFrame implements ActionListener {
         return currLinear;
     }
 
-    private JPanel createSineBlock(String a, String b, String c, String t_start, String t_end) {
+    private JPanel initSineBlock(String a, String b, String c, String t_start, String t_end) {
         JPanel currSine = new JPanel();
         currSine.setBorder(BorderFactory.createLineBorder(Color.black, 2, true));
         Dimension blockDim = new Dimension(frame.getWidth()-20, 40);
@@ -257,10 +259,17 @@ public class FunctionWindow extends JFrame implements ActionListener {
         }
 
         BlockContainer currContainer = new BlockContainer();
-        currContainer.block = createLinearBlock(m_val, b_val, t_start_val, t_end_val);
+        currContainer.block = initLinearBlock(m_val, b_val, t_start_val, t_end_val);
         currContainer.blockType = "linear";
         blockArray.add(currContainer);
-        }
+    }
+
+    void addLinearBlock(String m_val, String b_val, String t_start_val, String t_end_val) {
+        BlockContainer currContainer = new BlockContainer();
+        currContainer.block = initLinearBlock(m_val, b_val, t_start_val, t_end_val);
+        currContainer.blockType = "linear";
+        blockArray.add(currContainer);
+    }
 
     private void addSineBlock() {
         Component[] all_components = sinePanel.getComponents();
@@ -284,7 +293,14 @@ public class FunctionWindow extends JFrame implements ActionListener {
         }
 
         BlockContainer currContainer = new BlockContainer();
-        currContainer.block = createSineBlock(a_val, b_val, c_val, t_start_val, t_end_val);
+        currContainer.block = initSineBlock(a_val, b_val, c_val, t_start_val, t_end_val);
+        currContainer.blockType = "sine";
+        blockArray.add(currContainer);
+    }
+
+    void addSineBlock(String a_val, String b_val, String c_val, String t_start_val, String t_end_val) {
+        BlockContainer currContainer = new BlockContainer();
+        currContainer.block = initSineBlock(a_val, b_val, c_val, t_start_val, t_end_val);
         currContainer.blockType = "sine";
         blockArray.add(currContainer);
     }
@@ -293,6 +309,13 @@ public class FunctionWindow extends JFrame implements ActionListener {
         if (!blockArray.isEmpty()) {
             blockArray.remove(blockArray.size()-1);
             allFuncSettings.remove(allFuncSettings.size()-1);
+        }
+    }
+
+    void printFunctionTypes() {
+        // For debugging purposes. Prints the function type for each function in a given FunctionWindow object.
+        for (BlockContainer block : blockArray) {
+            System.out.println(block.blockType);
         }
     }
 

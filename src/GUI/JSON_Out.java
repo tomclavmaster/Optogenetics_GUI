@@ -159,6 +159,9 @@ class JSON_Out {
                 float b_float = Float.valueOf(b_val.trim());
                 pwmArr.add(b_float);
             } catch (NumberFormatException nfe) {
+                nfe.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Save Failed: Missing or Non-numerical PWM calibration values",
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 return 1;
             }
 
@@ -190,6 +193,9 @@ class JSON_Out {
             Object obj = jsonParser.parse(fileReader);
             JSONArray allSettingsList = (JSONArray) obj;
 
+
+            // Clear current function windows:
+            GUI.Gui.resetFunctionWindows();
 
             // Parse all channel settings:
             for (int curr_chan = 0; curr_chan < allSettingsList.size() - 1; curr_chan += 1) {
@@ -223,17 +229,40 @@ class JSON_Out {
                     }
 
 
+
                     // Grab all linear/sine function info from JSON:
                     JSONArray allFunctions = (JSONArray) currChannel.get("functions");
-                    for (int funcNum = 0; funcNum < allFunctions.size(); funcNum += 1) {
-                        JSONArray currFunctionArray = (JSONArray) allFunctions.get(funcNum);
+                    for (Object functionArray : allFunctions) {
+                        JSONArray currFunctionArray = (JSONArray) functionArray;
 
-                        functionPanels[curr_chan] =
+                        // Length dictates type of function:
+                        if (currFunctionArray.size() == 4) {
+                            // Linear function.
+
+                            String m = String.valueOf(currFunctionArray.get(0));
+                            String b = String.valueOf(currFunctionArray.get(1));
+                            String t_start = String.valueOf(currFunctionArray.get(2));
+                            String t_end = String.valueOf(currFunctionArray.get(3));
+
+                            functionPanels[curr_chan].addLinearBlock(m, b, t_start, t_end);
+
+                        } else if (currFunctionArray.size() == 5) {
+                            // Sine function.
+
+                            String a = String.valueOf(currFunctionArray.get(0));
+                            String b = String.valueOf(currFunctionArray.get(1));
+                            String c = String.valueOf(currFunctionArray.get(2));
+                            String t_start = String.valueOf(currFunctionArray.get(3));
+                            String t_end = String.valueOf(currFunctionArray.get(3));
+
+                            functionPanels[curr_chan].addSineBlock(a, b, c, t_start, t_end);
+
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Warning: Some settings could not be loaded.",
+                                    "Warning", JOptionPane.WARNING_MESSAGE);
+                        }
+
                     }
-
-
-
-
 
 
                 } catch (ClassCastException e) {
@@ -248,13 +277,6 @@ class JSON_Out {
 
 
 
-
-
-
-
-
-
-
             // Parse PWM conversion values:
             JSONArray pwmArr = (JSONArray) allSettingsList.get(allSettingsList.size()-1);
             String m_string = String.valueOf(pwmArr.get(0));
@@ -263,6 +285,7 @@ class JSON_Out {
             Component[] all_components = inputLinePanel.getComponents();
             ((JTextField) all_components[1]).setText(m_string);
             ((JTextField) all_components[3]).setText(b_string);
+
 
 
 
