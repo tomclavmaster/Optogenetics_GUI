@@ -1,22 +1,19 @@
 package GUI;
 
+import com.jcraft.jsch.*;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-
-// For images:
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-import javax.swing.JLabel;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
+// For images:
 // For SFTP:
-import com.jcraft.jsch.*;
 
 
 public class Gui extends JFrame implements ActionListener {
@@ -226,6 +223,23 @@ public class Gui extends JFrame implements ActionListener {
         leftPanel.add(intensityPanel);
         leftPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
+
+        // Board specs panel:
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        TitledBorder infoPanelBorder = new TitledBorder("Interface Information:");
+        infoPanelBorder.setTitleJustification(TitledBorder.LEFT);
+        infoPanelBorder.setTitlePosition(TitledBorder.TOP);
+        infoPanel.setBorder(infoPanelBorder);
+        infoPanel.add( new JLabel("\"uW/mm^2\" := microwatts per square millimeter"));
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        infoPanel.add( new JLabel("Function Max Sample Rate: 100 kHz <-> 100 ms"));
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        infoPanel.add( new JLabel("Blink Min Period: 100 ms <-> 100 kHz"));
+        leftPanel.add(infoPanel);
+
+
         // Board specs panel:
         JPanel boardSpecPanel = new JPanel();
         boardSpecPanel.setLayout(new BoxLayout(boardSpecPanel, BoxLayout.Y_AXIS));
@@ -237,8 +251,6 @@ public class Gui extends JFrame implements ActionListener {
         boardSpecPanel.add( new JLabel("-24 Plate Well"));
         boardSpecPanel.add( new JLabel("-Raspberry Pi Zero W with Raspbian Stretch"));
         boardSpecPanel.add( new JLabel("-Adafruit TLC5947 LED Driver"));
-
-
         leftPanel.add(boardSpecPanel);
     }
 
