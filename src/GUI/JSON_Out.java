@@ -1,18 +1,18 @@
 package GUI;
 
-import javax.swing.*;
-
-// For JSON file:
 import simple.JSONArray;
 import simple.JSONObject;
 import simple.parser.JSONParser;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 
 import static GUI.Gui.functionPanels;
 import static GUI.Gui.inputLinePanel;
+
+// For JSON file:
 
 class JSON_Out {
     static int write_json_file() {
@@ -275,8 +275,6 @@ class JSON_Out {
             }
 
 
-
-
             // Parse PWM conversion values:
             JSONArray pwmArr = (JSONArray) allSettingsList.get(allSettingsList.size()-1);
             String m_string = String.valueOf(pwmArr.get(0));
@@ -285,7 +283,6 @@ class JSON_Out {
             Component[] all_components = inputLinePanel.getComponents();
             ((JTextField) all_components[1]).setText(m_string);
             ((JTextField) all_components[3]).setText(b_string);
-
 
 
 

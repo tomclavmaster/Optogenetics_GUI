@@ -4,6 +4,7 @@ import com.jcraft.jsch.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -12,8 +13,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-// For images:
-// For SFTP:
+
+//import jlatexmath.*;
+
+
 
 
 public class Gui extends JFrame implements ActionListener {
@@ -36,6 +39,23 @@ public class Gui extends JFrame implements ActionListener {
         // Load intensity equation image:
         try {
             intensityEquation = ImageIO.read(getClass().getClassLoader().getResource("GUI/intensityEquation.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Load header equation images:
+        try {
+            headerPanels = new BufferedImage[9];
+            headerPanels[0] = ImageIO.read(getClass().getClassLoader().getResource("GUI/channel.png"));
+            headerPanels[1] = ImageIO.read(getClass().getClassLoader().getResource("GUI/const.png"));
+            headerPanels[2] = ImageIO.read(getClass().getClassLoader().getResource("GUI/blink.png"));
+            headerPanels[3] = ImageIO.read(getClass().getClassLoader().getResource("GUI/func.png"));
+            headerPanels[4] = ImageIO.read(getClass().getClassLoader().getResource("GUI/intensity.png"));
+            headerPanels[5] = ImageIO.read(getClass().getClassLoader().getResource("GUI/i_min.png"));
+            headerPanels[6] = ImageIO.read(getClass().getClassLoader().getResource("GUI/i_max.png"));
+            headerPanels[7] = ImageIO.read(getClass().getClassLoader().getResource("GUI/duty_cycle.png"));
+            headerPanels[8] = ImageIO.read(getClass().getClassLoader().getResource("GUI/period.png"));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -63,7 +83,7 @@ public class Gui extends JFrame implements ActionListener {
         // Main GUI window initialization:
         frame = new JFrame("LED Controller");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 750);
+        frame.setSize(1080, 770);
 //        frame.setResizable(false);
 
         // Initialize nested panels:
@@ -84,10 +104,10 @@ public class Gui extends JFrame implements ActionListener {
 
     private static void initFunctionWindows() {
         int chan_num = 0;
-        String letters[] = {"A","B","C","D"};
-        for (int i = 0; i < letters.length; i+=1) {
+        String[] letters = {"A","B","C","D"};
+        for (String letter : letters) {
             for (int j = 1; j <= 6; j += 1) {
-                functionPanels[chan_num] = new FunctionWindow(letters[i] + j);
+                functionPanels[chan_num] = new FunctionWindow(letter + j);
                 chan_num += 1;
             }
         }
@@ -117,7 +137,7 @@ public class Gui extends JFrame implements ActionListener {
             e -> {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Open");
-                fileChooser.setPreferredSize(new Dimension(800,600));
+                fileChooser.setPreferredSize(new Dimension(800,680));
                 fileChooser.setFileFilter(new FileNameExtensionFilter(".json files", "json"));
 
                 if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -232,11 +252,20 @@ public class Gui extends JFrame implements ActionListener {
         infoPanelBorder.setTitleJustification(TitledBorder.LEFT);
         infoPanelBorder.setTitlePosition(TitledBorder.TOP);
         infoPanel.setBorder(infoPanelBorder);
-        infoPanel.add( new JLabel("\"uW/mm^2\" := microwatts per square millimeter"));
+
+
+        infoPanel.add( new JLabel("Duty cycle = Percent time \"on\" per period."));
         infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        infoPanel.add( new JLabel("Function Max Sample Rate: 100 kHz <-> 100 ms"));
+        infoPanel.add( new JLabel("Period = Length of blink cycle."));
         infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        infoPanel.add( new JLabel("Blink Min Period: 100 ms <-> 100 kHz"));
+        infoPanel.add( new JLabel("<html>E.g. For 100ms blinks with 900ms pause, <br>   set duty cycle to 10% and period to 1s.</html>"));
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 50)));
+
+
+        infoPanel.add( new JLabel("Function Max Sample Rate: 100 kHz (i.e. 100 ms)"));
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        infoPanel.add( new JLabel("Blink Min Period: 100 ms (i.e. 100 kHz)"));
+
         leftPanel.add(infoPanel);
 
 
@@ -255,71 +284,93 @@ public class Gui extends JFrame implements ActionListener {
     }
 
     private void initCenterPanel() {
-        centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBorder(BorderFactory.createLineBorder(Color.black, 2,true));
-        centerPanel.add(makeButtonHeader());
-        centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
+        centerPanel = new JPanel();
+        centerGridBag = new GridBagLayout();
+        centerConstraints = new GridBagConstraints();
+        centerPanel.setLayout(centerGridBag);
+        centerConstraints.fill = GridBagConstraints.HORIZONTAL;
+//        centerPanel.setBorder(BorderFactory.createLineBorder(Color.black, 2,true));
+        centerPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.black, 2, true),
+                                                                new EmptyBorder(10,10,0,10)));
+
+
+        makeButtonHeader();
 
         int chan_num = 0;
-        String letters[] = {"A","B","C","D"};
+        String[] letters = {"A", "B", "C", "D"};
         for (String letter : letters)
             for (int j = 1; j <= 6; j += 1) {
-                JPanel fullWidthPanel = new JPanel();
-                fullWidthPanel.setLayout(new BoxLayout(fullWidthPanel, BoxLayout.X_AXIS));
+                makeChannelButtons(letter + j, chan_num);
+                makeIntensityPanel(chan_num);
 
-                JPanel channelButtons = makeChannelButtons(letter + j, chan_num);
-                JPanel intensityPanel = makeIntensityPanel(chan_num);
-
-
-                fullWidthPanel.add(channelButtons);
-                fullWidthPanel.add(intensityPanel);
-
-                centerPanel.add(fullWidthPanel);
                 chan_num += 1;
             }
+
+
         JButton submit = new JButton("Submit and Upload!");
         submit.addActionListener(this);
         submit.setActionCommand("submit_settings");
+
+        centerConstraints.gridwidth = 9;
+        centerConstraints.gridx = 0;
+        centerConstraints.gridy = chan_num + 1;
+        centerConstraints.weighty = 0;
+        centerConstraints.weightx = 1;
+        centerGridBag.setConstraints(submit, centerConstraints);
         centerPanel.add(submit);
     }
 
-    private JPanel makeButtonHeader() {
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.X_AXIS));
-        headerPanel.add( new JLabel("Channel:") );
-        headerPanel.add(Box.createRigidArea(new Dimension(5, 0)));
-        headerPanel.add( new JLabel("Const / "));
-        headerPanel.add( new JLabel("Blink / "));
-        headerPanel.add( new JLabel("Func"));
-        headerPanel.add(Box.createRigidArea(new Dimension(17, 0)));
-        headerPanel.add( new JLabel("I (uW/mm^2)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(40, 0)));
-        headerPanel.add( new JLabel("I_min"));
-        headerPanel.add(Box.createRigidArea(new Dimension(72, 0)));
-        headerPanel.add( new JLabel("I_max"));
-        headerPanel.add(Box.createRigidArea(new Dimension(60, 0)));
-        headerPanel.add( new JLabel("duty_cycle (%)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(30, 0)));
-        headerPanel.add( new JLabel("period (s)"));
-        headerPanel.add(Box.createRigidArea(new Dimension(100, 0)));
 
-        return headerPanel;
+    private void makeButtonHeader() {
+        String[] labels = {"Channel:", "Const", "Blink", "Func", "I(uW/mm^2)", "I_min", "I_max", "duty_cycle (%)", "period (s)"};
+
+        for (int i = 0; i<headerPanels.length; i+=1) {
+            HeaderPanel currPanel = new HeaderPanel(i);
+            currPanel.setPreferredSize(new Dimension(85, 25));
+            currPanel.setMinimumSize(currPanel.getPreferredSize());
+            JPanel jpanel = new JPanel();
+            jpanel.add(currPanel);
+
+            centerConstraints.weightx = 1;
+            centerConstraints.weighty = 0;
+            centerConstraints.gridx = i;
+            centerConstraints.gridy = 0;
+            centerGridBag.setConstraints(jpanel, centerConstraints);
+            centerPanel.add(jpanel);
+        }
+
     }
 
-    private JPanel makeChannelButtons(String label, int chan_num) {
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-        buttonPanel.add( new JLabel("Channel " + label + ":\t") );
+
+    private void makeChannelButtons(String label, int chan_num) {
+
+        JLabel channelNum = new JLabel("Channel " + label + ":\t");
+
+        centerConstraints.gridx = 0;
+        centerConstraints.gridy = chan_num + 1;
+        centerConstraints.weightx = 0;
+//        centerConstraints.weighty = 1;
+
+
+        centerGridBag.setConstraints(channelNum, centerConstraints);
+        centerPanel.add(channelNum);
 
         controlButtons[chan_num] = new JRadioButton[]{new JRadioButton(), new JRadioButton(), new JRadioButton()};
         controlButtons[chan_num][0].setSelected(true);
-        buttonPanel.add(controlButtons[chan_num][0]);
-        buttonPanel.add(controlButtons[chan_num][1]);
-        buttonPanel.add(controlButtons[chan_num][2]);
-        buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
+
+
+        for (int i = 0; i<3; i+=1) {
+            // In order to properly resize buttons, require interacting with the constraints panel:
+            centerConstraints.gridx = i+1;
+            centerConstraints.gridy = chan_num + 1;
+            centerConstraints.weightx = 0.1;
+            centerGridBag.setConstraints(controlButtons[chan_num][i], centerConstraints);
+            centerPanel.add(controlButtons[chan_num][i]);
+
+        }
+
+        // Add the three buttons to a button group:
         ButtonGroup bG = new ButtonGroup();
         bG.add(controlButtons[chan_num][0]);
         bG.add(controlButtons[chan_num][1]);
@@ -331,19 +382,23 @@ public class Gui extends JFrame implements ActionListener {
             controlButtons[chan_num][i].setActionCommand(Integer.toString(chan_num) + "," + Integer.toString(i));
         }
 
-        return buttonPanel;
     }
 
-    private JPanel makeIntensityPanel(int chan_num) {
+
+    private void makeIntensityPanel(int chan_num) {
         intensitySettings[chan_num] = new JTextField[]{new JTextField("",20), new JTextField("",20),
                 new JTextField("",20), new JTextField("",20),
                 new JTextField("",20)};
-        JPanel intensityPanel = new JPanel();
-        intensityPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        intensityPanel.setLayout(new BoxLayout(intensityPanel, BoxLayout.X_AXIS));
+
 
         for (int i = 0; i<5; i+=1) {
-            intensityPanel.add(intensitySettings[chan_num][i]);
+            centerConstraints.gridx = i+4;
+            centerConstraints.gridy = chan_num + 1;
+            centerConstraints.weightx = 1;
+//            centerConstraints.weighty = 1;
+
+            centerGridBag.setConstraints(intensitySettings[chan_num][i], centerConstraints);
+            centerPanel.add(intensitySettings[chan_num][i]);
         }
         for (int i=1; i<5; i+=1) {
             intensitySettings[chan_num][i].setEnabled(false);
@@ -355,7 +410,6 @@ public class Gui extends JFrame implements ActionListener {
                 frame.repaint();
             }
         });
-        return intensityPanel;
     }
 
 
@@ -410,8 +464,6 @@ public class Gui extends JFrame implements ActionListener {
 
 
 
-
-
     private void uploadJSON() {
         JSch jsch = new JSch();
         Session session;
@@ -451,10 +503,15 @@ public class Gui extends JFrame implements ActionListener {
     private JFrame frame;
     private JPanel leftPanel;
     private JPanel centerPanel;
+    private JFrame centerFrame;
+
+    private GridBagLayout centerGridBag;
+    private GridBagConstraints centerConstraints;
 
     static JPanel inputLinePanel;
     static BufferedImage stripes;
     static BufferedImage intensityEquation;
+    static BufferedImage[] headerPanels;
 
     static JRadioButton[][] controlButtons = new JRadioButton[24][3];
     static JTextField[][] intensitySettings = new JTextField[24][5];
