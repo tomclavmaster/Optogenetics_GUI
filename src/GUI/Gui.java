@@ -191,11 +191,21 @@ public class Gui extends JFrame implements ActionListener {
         plateTypePanel.setBorder(plateBorder);
 
         JRadioButton plate24Well = new JRadioButton("24 Plate Well", true);
+        JRadioButton plate96Well = new JRadioButton("96 Plate Well", false);
         ButtonGroup bG = new ButtonGroup();
         bG.add(plate24Well);
+        bG.add(plate96Well);
+
+        plate24Well.addActionListener(this);
+        plate24Well.setActionCommand("24_selected");
+        plate96Well.addActionListener(this);
+        plate96Well.setActionCommand("96_selected");
+
         plateTypePanel.add(plate24Well);
+        plateTypePanel.add(plate96Well);
         leftPanel.add(plateTypePanel);
         leftPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
 
         // Overview panel:
         PreviewPanel overviewPanel = new PreviewPanel();
@@ -277,7 +287,7 @@ public class Gui extends JFrame implements ActionListener {
         boardSpecBorder.setTitleJustification(TitledBorder.LEFT);
         boardSpecBorder.setTitlePosition(TitledBorder.TOP);
         boardSpecPanel.setBorder(boardSpecBorder);
-        boardSpecPanel.add( new JLabel("-24 Plate Well"));
+        boardSpecPanel.add( new JLabel("-24/96 Plate Well"));
         boardSpecPanel.add( new JLabel("-Raspberry Pi Zero W with Raspbian Stretch"));
         boardSpecPanel.add( new JLabel("-Adafruit TLC5947 LED Driver"));
         leftPanel.add(boardSpecPanel);
@@ -444,16 +454,26 @@ public class Gui extends JFrame implements ActionListener {
         String curr_action = e.getActionCommand();
         frame.repaint();
 
-        if (curr_action.equals("submit_settings")) {
-            int exit_code = JSON_Out.write_json_file();
-            if (exit_code == 0) {
-                uploadJSON();
-            }
-        } else {
-            int chan_num = Integer.parseInt(curr_action.split(",")[0]);
-            int buttonNum = Integer.parseInt(curr_action.split(",")[1]);
+        switch (curr_action) {
+            case "submit_settings":
+                int exit_code = JSON_Out.write_json_file();
+                if (exit_code == 0) uploadJSON();
+                break;
 
-            channelRedraw(chan_num, buttonNum, true);
+            case "24_selected":
+                num_wells = 24;
+                break;
+
+            case "96_selected":
+                num_wells = 96;
+                break;
+
+            default:
+                int chan_num = Integer.parseInt(curr_action.split(",")[0]);
+                int buttonNum = Integer.parseInt(curr_action.split(",")[1]);
+
+                channelRedraw(chan_num, buttonNum, true);
+                break;
         }
     }
 
@@ -467,6 +487,33 @@ public class Gui extends JFrame implements ActionListener {
     private void uploadJSON() {
         JSch jsch = new JSch();
         Session session;
+
+        // First attempt USB connection.
+        try {
+            session = jsch.getSession("pi", "raspberrypi.local");
+            session.setConfig("StrictHostKeyChecking", "no");
+            session.setTimeout(3000); // Timeout after 3 seconds without connection.
+            session.setPassword("raspberry");
+            session.connect();
+
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
+            ChannelSftp sftpChannel = (ChannelSftp) channel;
+
+
+            String settingsDirectory = (System.getProperty("user.dir") + "/settings.json");
+            sftpChannel.put(settingsDirectory, "/home/pi/LED_Driver/Adafruit_TLC5947_master/settings.json");
+            sftpChannel.exit();
+            session.disconnect();
+
+        } catch (JSchException e) {
+            System.out.println("Unable to connect with USB, attempting WiFi");
+        } catch (SftpException e) {
+            System.out.println("Unable to connect with USB, attempting WiFi");
+        }
+
+
+        // Then attempt WiFi connection.
         try {
             session = jsch.getSession("pi", "192.168.4.1");
             session.setConfig("StrictHostKeyChecking", "no");
@@ -503,7 +550,6 @@ public class Gui extends JFrame implements ActionListener {
     private JFrame frame;
     private JPanel leftPanel;
     private JPanel centerPanel;
-    private JFrame centerFrame;
 
     private GridBagLayout centerGridBag;
     private GridBagConstraints centerConstraints;
@@ -516,6 +562,8 @@ public class Gui extends JFrame implements ActionListener {
     static JRadioButton[][] controlButtons = new JRadioButton[24][3];
     static JTextField[][] intensitySettings = new JTextField[24][5];
     static FunctionWindow[] functionPanels = new FunctionWindow[24];
+
+    static int num_wells = 24;
 
     // Necessary for menu bar:
     private JMenuBar menuBar;
