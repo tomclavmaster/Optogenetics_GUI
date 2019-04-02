@@ -79,10 +79,10 @@ public class PreviewPanel extends JPanel {
         } else {
             for (int i=0; i<12; i+=1) {
                 for (int j=0; j<8; j+=1) {
-                    if (controlButtons[6*(j/2)+(i/2)][0].isSelected()) {
+                    if (controlButtons[12*(j/4)+i][0].isSelected()) {
 
                         // Determine whether to black out the circle or show blue illumination:
-                        JTextField curr_setting = intensitySettings[6*(j/2)+(i/2)][0];
+                        JTextField curr_setting = intensitySettings[6*(j/4)+i][0];
                         String text = curr_setting.getText();
 
                         try {
@@ -104,12 +104,12 @@ public class PreviewPanel extends JPanel {
                                 getWidth()/18, getHeight()/12);
 
 
-                    } else if (controlButtons[6*(j/2)+(i/2)][1].isSelected()) {
+                    } else if (controlButtons[12*(j/4)+i][1].isSelected()) {
                         g2.setPaint(tp);
                         g.fillOval(getWidth()/12 + i*getWidth()/14, getHeight()/8 + j*getHeight()/10,
                                 getWidth()/18, getHeight()/12);
 
-                    } else if (controlButtons[6*(j/2)+(i/2)][2].isSelected()) {
+                    } else if (controlButtons[12*(j/4)+i][2].isSelected()) {
                         GradientPaint bluetowhite = new GradientPaint(
                                 getWidth()/12 + i*getWidth()/14,
                                 getHeight()/8 + j*getHeight()/10,
@@ -119,11 +119,13 @@ public class PreviewPanel extends JPanel {
                                 Color.WHITE);
 
                         g2.setPaint(bluetowhite);
-                        g.fillOval(getWidth()/12 + i*getWidth()/14, getHeight()/8 + j*getHeight()/10,
+                        g.fillOval(getWidth()/12 + i*getWidth()/14,
+                                   getHeight()/8 + j*getHeight()/10,
                                 getWidth()/18, getHeight()/12);
                     } else {
                         g.setColor(Color.GRAY);
-                        g.fillOval(getWidth()/12 + i*getWidth()/14, getHeight()/8 + j*getHeight()/10,
+                        g.fillOval(getWidth()/12 + i*getWidth()/14,
+                                   getHeight()/8 + j*getHeight()/10,
                                 getWidth()/18, getHeight()/12);
                     }
 

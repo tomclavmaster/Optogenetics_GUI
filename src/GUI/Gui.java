@@ -83,7 +83,7 @@ public class Gui extends JFrame implements ActionListener {
         // Main GUI window initialization:
         frame = new JFrame("LED Controller");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1080, 770);
+        frame.setSize(1200, 780);
 //        frame.setResizable(false);
 
         // Initialize nested panels:
@@ -94,7 +94,14 @@ public class Gui extends JFrame implements ActionListener {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout(5,0));
         mainPanel.add(leftPanel, BorderLayout.LINE_START);
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
+
+        // Put into scroll window:
+        JScrollPane centerScrollPanel = new JScrollPane(centerPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        centerPanel.setPreferredSize(centerPanel.getMinimumSize());
+        centerPanel.setMaximumSize(centerPanel.getMinimumSize());
+
+
+        mainPanel.add(centerScrollPanel);
         frame.add(mainPanel);
 
 
@@ -300,7 +307,6 @@ public class Gui extends JFrame implements ActionListener {
         centerConstraints = new GridBagConstraints();
         centerPanel.setLayout(centerGridBag);
         centerConstraints.fill = GridBagConstraints.HORIZONTAL;
-//        centerPanel.setBorder(BorderFactory.createLineBorder(Color.black, 2,true));
         centerPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.black, 2, true),
                                                                 new EmptyBorder(10,10,0,10)));
 
@@ -337,7 +343,7 @@ public class Gui extends JFrame implements ActionListener {
 
         for (int i = 0; i<headerPanels.length; i+=1) {
             HeaderPanel currPanel = new HeaderPanel(i);
-            currPanel.setPreferredSize(new Dimension(85, 25));
+            currPanel.setPreferredSize(new Dimension(80, 25)); // was w=85
             currPanel.setMinimumSize(currPanel.getPreferredSize());
             JPanel jpanel = new JPanel();
             jpanel.add(currPanel);
@@ -360,7 +366,6 @@ public class Gui extends JFrame implements ActionListener {
         centerConstraints.gridx = 0;
         centerConstraints.gridy = chan_num + 1;
         centerConstraints.weightx = 0;
-//        centerConstraints.weighty = 1;
 
 
         centerGridBag.setConstraints(channelNum, centerConstraints);
