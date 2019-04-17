@@ -82,7 +82,7 @@ public class PreviewPanel extends JPanel {
                     if (controlButtons[12*(j/4)+i][0].isSelected()) {
 
                         // Determine whether to black out the circle or show blue illumination:
-                        JTextField curr_setting = intensitySettings[6*(j/4)+i][0];
+                        JTextField curr_setting = intensitySettings[12*(j/4)+i][0];
                         String text = curr_setting.getText();
 
                         try {

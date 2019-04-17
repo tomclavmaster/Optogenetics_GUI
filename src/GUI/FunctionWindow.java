@@ -1,7 +1,5 @@
 package GUI;
 
-import sun.jvm.hotspot.opto.Block;
-
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -42,12 +40,16 @@ public class FunctionWindow extends JFrame implements ActionListener {
         refreshBlocks();
     }
 
+
     private JPanel createAddBlock() {
         // Add linear side:
         linearPanel = new JPanel();
         TitledBorder bordLinearBorder = new TitledBorder(BorderFactory.createLineBorder(Color.black, 1, true),
-                "New Linear Function: [mx+b]", TitledBorder.LEFT, TitledBorder.TOP);
+                "<html>New Linear Function: [mx+b]" +
+                        "<br><br>[m]=uW/mm^2/sec" +
+                        "<br>[b]=uW/mm^2<br><br><br></html>", TitledBorder.LEFT, TitledBorder.TOP);
         linearPanel.setBorder(bordLinearBorder);
+
 
         linearPanel.add(new JLabel("m:"));
         linearPanel.add(new JTextField("", 5));
@@ -68,7 +70,10 @@ public class FunctionWindow extends JFrame implements ActionListener {
         // Add sine side:
         sinePanel = new JPanel();
         TitledBorder bordSineBorder = new TitledBorder(BorderFactory.createLineBorder(Color.black, 1, true),
-                "New Sinusoidal Function: [Asin(Bt)+C]", TitledBorder.LEFT, TitledBorder.TOP);
+                "<html>New Sinusoidal Function: [Asin(Bt)+C]" +
+                        "<br><br>[A]=(unitless, amplitude)" +
+                        "<br>[B]=(Hz, frequency)" +
+                        "<br>[C]=(uW/mm^2, y-intercept)<br><br></html>", TitledBorder.LEFT, TitledBorder.TOP);
         sinePanel.setBorder(bordSineBorder);
 
         sinePanel.add(new JLabel("A:"));
@@ -95,7 +100,7 @@ public class FunctionWindow extends JFrame implements ActionListener {
 
         // Encapsulate linear and sine in a JSplitPane:
         JSplitPane blockPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, linearPanel, sinePanel);
-        Dimension blockPanelDim = new Dimension(frame.getWidth()-70, 130);
+        Dimension blockPanelDim = new Dimension(frame.getWidth()-70, 180);
         blockPanel.setMaximumSize(blockPanelDim);
         blockPanel.setMinimumSize(blockPanelDim);
         blockPanel.setPreferredSize(blockPanelDim);
@@ -104,7 +109,7 @@ public class FunctionWindow extends JFrame implements ActionListener {
 
         JPanel blockPanelContainer = new JPanel();
         blockPanelContainer.setBorder(BorderFactory.createLineBorder(Color.black, 2, true));
-        Dimension blockPanelContainerDim = new Dimension(frame.getWidth()-20, 170);
+        Dimension blockPanelContainerDim = new Dimension(frame.getWidth()-20, 220);
         blockPanelContainer.setMaximumSize(blockPanelContainerDim);
         blockPanelContainer.setMinimumSize(blockPanelContainerDim);
         blockPanelContainer.setPreferredSize(blockPanelContainerDim);
@@ -332,5 +337,6 @@ public class FunctionWindow extends JFrame implements ActionListener {
     private JPanel linearPanel;
     private JPanel sinePanel;
     private JPanel addPanel;
+    private JPanel unitPanel;
 
 }

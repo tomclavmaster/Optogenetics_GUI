@@ -279,9 +279,9 @@ public class Gui extends JFrame implements ActionListener {
         infoPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 
 
-        infoPanel.add( new JLabel("Function Max Sample Rate: 100 kHz (i.e. 100 ms)"));
+        infoPanel.add( new JLabel("Function sample rate: 5 Hz (i.e. 200 ms)"));
         infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        infoPanel.add( new JLabel("Blink Min Period: 100 ms (i.e. 100 kHz)"));
+        infoPanel.add( new JLabel("Blink signal deteriorates below 10 ms pulse width"));
 
         leftPanel.add(infoPanel);
 
