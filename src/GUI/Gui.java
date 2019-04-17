@@ -271,17 +271,17 @@ public class Gui extends JFrame implements ActionListener {
         infoPanel.setBorder(infoPanelBorder);
 
 
-        infoPanel.add( new JLabel("Duty cycle = Percent time \"on\" per period."));
+        infoPanel.add( new JLabel("Duty cycle (%) = Percent time \"on\" per period."));
         infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        infoPanel.add( new JLabel("Period = Length of blink cycle."));
+        infoPanel.add( new JLabel("Period (s) = Length of blink cycle."));
         infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         infoPanel.add( new JLabel("<html>E.g. For 100ms blinks with 900ms pause, <br>   set duty cycle to 10% and period to 1s.</html>"));
         infoPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 
 
-        infoPanel.add( new JLabel("Function sample rate: 5 Hz (i.e. 200 ms)"));
+        infoPanel.add( new JLabel("Function sample rate: 5 Hz."));
         infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        infoPanel.add( new JLabel("Blink signal deteriorates below 10 ms pulse width"));
+        infoPanel.add( new JLabel("Blink signal deteriorates below 10 ms pulse width."));
 
         leftPanel.add(infoPanel);
 
@@ -343,7 +343,11 @@ public class Gui extends JFrame implements ActionListener {
 
         for (int i = 0; i<headerPanels.length; i+=1) {
             HeaderPanel currPanel = new HeaderPanel(i);
-            currPanel.setPreferredSize(new Dimension(80, 25)); // was w=85
+            if (labels[i].equals("duty_cycle (%)")) {
+                currPanel.setPreferredSize(new Dimension(110, 25)); // was w=85
+            } else {
+                currPanel.setPreferredSize(new Dimension(72, 25)); // was w=85
+            }
             currPanel.setMinimumSize(currPanel.getPreferredSize());
             JPanel jpanel = new JPanel();
             jpanel.add(currPanel);
